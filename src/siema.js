@@ -28,9 +28,10 @@ export default class Siema {
       this.config.startIndex % this.innerElements.length :
       Math.max(0, Math.min(this.config.startIndex, this.innerElements.length - this.perPage));
     this.transformProperty = Siema.webkitOrNot();
+    this.arrows = null;
 
     // Bind all event handlers for referencability
-    ['resizeHandler', 'touchstartHandler', 'touchendHandler', 'touchmoveHandler', 'mousedownHandler', 'mouseupHandler', 'mouseleaveHandler', 'mousemoveHandler', 'clickHandler'].forEach(method => {
+    ['resizeHandler', 'touchstartHandler', 'touchendHandler', 'touchmoveHandler', 'mousedownHandler', 'mouseupHandler', 'mouseleaveHandler', 'mousemoveHandler', 'clickHandler', 'leftArrowClickHandler', 'rightArrowClickHandler'].forEach(method => {
       this[method] = this[method].bind(this);
     });
 
@@ -56,6 +57,7 @@ export default class Siema {
       threshold: 20,
       loop: false,
       rtl: false,
+      arrows: false,
       onInit: () => { },
       onChange: () => { },
     };
@@ -197,6 +199,50 @@ export default class Siema {
     this.selector.innerHTML = '';
     this.selector.appendChild(this.sliderFrame);
 
+    //Adds Arrow controls
+    if (this.config.arrows && this.config.arrows.left && this.config.arrows.right) {
+      this.arrows = {};
+
+      if (typeof this.config.arrows.left === 'string') {
+        var leftArrow = document.createElement("div");
+        leftArrow.className = this.config.arrows.left;
+        this.selector.appendChild(leftArrow);
+        this.arrows.left = leftArrow;
+      } else {
+        this.selector.appendChild(this.config.arrows.left);
+        this.arrows.left = this.config.arrows.left;
+        this.arrows.left.removeEventListener("click", this.leftArrowClickHandler);
+      }
+      this.arrows.left.addEventListener("click", this.leftArrowClickHandler);
+
+      if (typeof this.config.arrows.right === 'string') {
+        var rightArrow = document.createElement("div");
+        rightArrow.className = this.config.arrows.right;
+        this.selector.appendChild(rightArrow);
+        this.arrows.right = rightArrow;
+      } else {
+        this.selector.appendChild(this.config.arrows.right);
+        this.arrows.right = this.config.arrows.right;
+        this.arrows.right.removeEventListener("click", this.rightArrowClickHandler);
+      }
+      this.arrows.right.addEventListener("click", this.rightArrowClickHandler);
+
+      if (this.config.loop != true) {
+        if (this.perPage >= this.innerElements.length) {
+          this.arrows.left.style.display = "none";
+          this.arrows.right.style.display = "none";
+        } else {
+          this.arrows.right.style.display = "block";
+
+          if (this.currentSlide == 0) {
+            this.arrows.left.style.display = "none";
+          } else {
+            this.arrows.left.style.display = "block";
+          }
+        }
+      }
+    }
+
     // Go to currently active slide after initial build
     this.slideToCurrent();
   }
@@ -210,6 +256,19 @@ export default class Siema {
     return elementContainer;
   }
 
+  /**
+   * Click handler used by Left Arrow
+   */
+  leftArrowClickHandler() {
+    this.prev();
+  }
+
+  /**
+   * Click handler used by Right Arrow
+   */
+  rightArrowClickHandler() {
+    this.next();
+  }
 
   /**
    * Determinates slides number accordingly to clients viewport.
@@ -226,6 +285,16 @@ export default class Siema {
         if (window.innerWidth >= viewport) {
           this.perPage = this.config.perPage[viewport];
         }
+      }
+    }
+
+    if (this.config.loop != true && this.arrows && this.arrows.left && this.arrows.right) {
+      if (this.perPage >= this.innerElements.length) {
+        this.arrows.left.style.display = "none";
+        this.arrows.right.style.display = "none";
+      } else {
+        this.arrows.left.style.display = "block";
+        this.arrows.right.style.display = "block";
       }
     }
   }
@@ -264,6 +333,14 @@ export default class Siema {
     }
     else {
       this.currentSlide = Math.max(this.currentSlide - howManySlides, 0);
+
+      if (this.arrows && this.arrows.left && this.currentSlide == 0) {
+        this.arrows.left.style.display = "none";
+      }
+
+      if (this.arrows && this.arrows.right) {
+        this.arrows.right.style.display = "block";
+      }
     }
 
     if (beforeChange !== this.currentSlide) {
@@ -309,7 +386,17 @@ export default class Siema {
     }
     else {
       this.currentSlide = Math.min(this.currentSlide + howManySlides, this.innerElements.length - this.perPage);
+
+
+      if (this.arrows && this.arrows.left) {
+        this.arrows.left.style.display = "block";
+      }
+
+      if (this.arrows && this.arrows.right && this.currentSlide + this.perPage >= this.innerElements.length) {
+        this.arrows.right.style.display = "none";
+      }
     }
+
     if (beforeChange !== this.currentSlide) {
       this.slideToCurrent(this.config.loop);
       this.config.onChange.call(this);
@@ -536,9 +623,7 @@ export default class Siema {
       // if dragged element is a link
       // mark preventClick prop as a true
       // to detemine about browser redirection later on
-      if (e.target.nodeName === 'A') {
-        this.drag.preventClick = true;
-      }
+      this.drag.preventClick = true;
 
       this.drag.endX = e.pageX;
       this.selector.style.cursor = '-webkit-grabbing';
