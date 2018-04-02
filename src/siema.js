@@ -516,7 +516,6 @@ export default class Siema {
    */
   mouseupHandler(e) {
 
-    e.preventDefault();
     e.stopPropagation();
     this.pointerDown = false;
     this.selector.style.cursor = '-webkit-grab';
@@ -537,7 +536,9 @@ export default class Siema {
       // if dragged element is a link
       // mark preventClick prop as a true
       // to detemine about browser redirection later on
-      this.drag.preventClick = true;
+      if (e.target.nodeName === 'A') {
+        this.drag.preventClick = true;
+      }
 
       this.drag.endX = e.pageX;
       this.selector.style.cursor = '-webkit-grabbing';
@@ -577,7 +578,6 @@ export default class Siema {
     // prevent browsers from folowing the link
     if (this.drag.preventClick) {
       e.preventDefault();
-      e.stopPropagation();
     }
     this.drag.preventClick = false;
   }
@@ -698,7 +698,6 @@ export default class Siema {
    * Reset
    * Removes all slides and resets index
    */
-
   reset() {
     this.selector.innerHTML = '';
     this.innerElements = [].slice.call(this.selector.children);
