@@ -104,6 +104,9 @@ Loop the slides around [(example)](http://codepen.io/pawelgrzybek/pen/zwOrKN).
 **`rtl`** (boolean)  
 Enables layout for languages written from right to left (like Hebrew or Arabic) [(example)](https://codepen.io/pawelgrzybek/pen/XZNEgd).
 
+**`fixedSlideWidth`** (number)
+Sets a fixed width for all the slides, and creates dynamic carousel that overrides perPage
+
 **`onInit`** (function)  
 Runs immediately after initialization [(example)](http://codepen.io/pawelgrzybek/pen/BRBjpE).
 
@@ -140,6 +143,9 @@ Remove all event listeners on instance [(example)](http://codepen.io/pawelgrzybe
 
 **`currentSlide`**  
 Prints current slide index [(example)](https://codepen.io/pawelgrzybek/pen/XRNOPP).
+
+**`reset`**
+Removes all slides and resets the indexes.
 
 ## Example
 
