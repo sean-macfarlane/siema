@@ -22,7 +22,7 @@ export default class Siema {
     this.resolveSlidesNumber();
 
     // Create global references
-    this.selectorWidth = this.selector.offsetWidth;
+    this.selectorWidth = (options.width ? options.width : this.selector.offsetWidth);
     this.innerElements = [].slice.call(this.selector.children);
     this.currentSlide = this.config.loop ?
       this.config.startIndex % this.innerElements.length :
